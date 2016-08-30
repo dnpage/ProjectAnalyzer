@@ -12,7 +12,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function setup()
     {
-        $this->project_analyzer = new ProjectAnalyzer('/var/www/phpdesignpatterns/src/Lib/ProjectAnalyzer');
+        $this->project_analyzer = new ProjectAnalyzer(__DIR__ . '/../src');
     }
 
     public function testClassExists()
@@ -25,7 +25,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
         $dirs = $this->project_analyzer->getDirs();
 
         $this->assertInternalType('array', $dirs);
-        $this->assertEquals(2, count($dirs));
+        $this->assertEquals(1, count($dirs));
     }
 
     public function testReturnsArrayOfFiles()
@@ -48,14 +48,12 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsLOCForAFile()
     {
-        $loc = $this->project_analyzer->getLOC(
-            '/var/www/phpdesignpatterns/src/Lib/ProjectAnalyzer/Tests/FakeDoubleClass.php'
-        );
+        $loc = $this->project_analyzer->getLOC(__DIR__ . '/FakeDoubleClass.php');
         $sub_total = $loc['blank'] + $loc['comment'] + $loc['loc'];
-        $this->assertEquals(6, $loc['blank']);
-        $this->assertEquals(8, $loc['comment']);
-        $this->assertEquals(16, $loc['loc']);
-        $this->assertEquals(30, $loc['total']);
+        $this->assertEquals(5, $loc['blank']);
+        $this->assertEquals(7, $loc['comment']);
+        $this->assertEquals(15, $loc['loc']);
+        $this->assertEquals(27, $loc['total']);
         $this->assertEquals($sub_total, $loc['total']);
     }
 
@@ -73,30 +71,21 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsClassCountForAFileWithOneClassDeclaration()
     {
-        $class_count = $this->project_analyzer->getTokenCount(
-            '/var/www/phpdesignpatterns/src/Lib/ProjectAnalyzer/Tests/FakeClass.php',
-            T_CLASS
-        );
+        $class_count = $this->project_analyzer->getTokenCount(__DIR__ . '/FakeClass.php', T_CLASS);
         $this->assertEquals(1, $class_count);
     }
 
 
     public function testReturnsClassCountForAFileWithTwoClassDeclarations()
     {
-        $class_count = $this->project_analyzer->getTokenCount(
-            '/var/www/phpdesignpatterns/src/Lib/ProjectAnalyzer/Tests/FakeDoubleClass.php',
-            T_CLASS
-        );
+        $class_count = $this->project_analyzer->getTokenCount(__DIR__ . '/FakeDoubleClass.php', T_CLASS);
         $this->assertEquals(2, $class_count);
     }
 
 
     public function testReturnsClassCountForAFileWithAnInterfaceDeclarations()
     {
-        $class_count = $this->project_analyzer->getTokenCount(
-            '/var/www/phpdesignpatterns/src/Lib/ProjectAnalyzer/Tests/FakeInterface.php',
-            T_CLASS
-        );
+        $class_count = $this->project_analyzer->getTokenCount(__DIR__ . '/FakeInterface.php', T_CLASS);
         $this->assertEquals(0, $class_count);
     }
 
@@ -109,10 +98,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsMethodCountForOneClass()
     {
-        $method_count = $this->project_analyzer->getTokenCount(
-            '/var/www/phpdesignpatterns/src/Lib/ProjectAnalyzer/Tests/FakeClass.php',
-            T_FUNCTION
-        );
+        $method_count = $this->project_analyzer->getTokenCount(__DIR__ . '/FakeClass.php', T_FUNCTION);
         $this->assertEquals(1, $method_count);
     }
 
