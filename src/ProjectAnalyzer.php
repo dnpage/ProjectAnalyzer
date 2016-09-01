@@ -5,44 +5,45 @@ namespace DNPage\ProjectAnalyzer;
 
 class ProjectAnalyzer
 {
-    protected $path;
     protected $dirs = [];
-    protected $path_files = [];
     protected $files = [];
     protected $stats = [];
+    protected $total_loc_breakdown = [];
+
     public function __construct($path)
     {
-        $this->path = $path;
-        $this->dirs = $this->getDirs();
-        $this->files = $this->getAllFiles();
+        $this->dirs = $this->getDirs($path);
+        $this->files = $this->getAllFiles($this->dirs);
+        $this->calcAllStats();
     }
 
-    public function getDirs()
+    public function getDirs($path)
     {
         try {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator(
-                    $this->path,
+                    $path,
                     \RecursiveDirectoryIterator::SKIP_DOTS
                 ),
                 \RecursiveIteratorIterator::SELF_FIRST
             );
 
-            $this->dirs = [$this->path];
+            $this->dirs = [$path];
             foreach ($iterator as $path => $dir) {
                 if ($dir->isDir()) {
                     $this->dirs[] = $path;
                 }
             }
         }  catch (\UnexpectedValueException $e) {
-            throw new \Exception("Unable to analyze path: $this->path Please verify path");
+            throw new \Exception("Unable to analyze path: $path Please verify path");
         }
         return $this->dirs;
     }
 
-    public function getAllFiles()
+    public function getAllFiles($dirs)
     {
-        foreach ($this->dirs as $dir) {
+        $this->files = [];
+        foreach ($dirs as $dir) {
             $this->files[$dir] = $this->getFiles($dir);
         }
         return $this->files;
@@ -57,21 +58,17 @@ class ProjectAnalyzer
         return $files;
     }
 
-    public function getDirectoryCount()
-    {
-        return count($this->dirs);
-    }
-
-    public function getFileCount()
-    {
-        $count = 0;
-        foreach ($this->files as $dir => $files) {
-            $count += count($files);
-        }
-        return $count;
-    }
-
     public function getAllStats()
+    {
+        return $this->stats;
+    }
+
+    public function getTotalLOCBreakdown()
+    {
+        return $this->total_loc_breakdown;
+    }
+
+    private function calcAllStats()
     {
         $stats = [];
         foreach ($this->files as $dir => $files) {
@@ -108,14 +105,14 @@ class ProjectAnalyzer
             }
         }
 
-        $stats[] = $this->getTotalStats();
+        $stats[] = $this->calcTotalStats();
 
         $this->stats = $stats;
 
-        return $stats;
+        $this->total_loc_breakdown = $this->calcTotalLOCBreakdown($this->stats);
     }
 
-    public function getTotalStats()
+    private function calcTotalStats()
     {
 
         $total_loc = $this->getTotalLOC();
@@ -139,13 +136,13 @@ class ProjectAnalyzer
         return $total_stats;
     }
 
-    public function getTotalLOCBreakdown()
+    private function calcTotalLOCBreakdown($stats)
     {
         $code_loc = 0;
         $test_loc = 0;
         $loc_breakdown['code_loc'] = 0;
         $loc_breakdown['test_loc'] = 0;
-        foreach ($this->stats as $stat) {
+        foreach ($stats as $stat) {
             if ($stat['Name'] != 'Total') {
                 if ($this->isNamedTestDir($stat['Name'])) {
                     $test_loc += $stat['LOC'];
