@@ -1,6 +1,6 @@
 <?php
 
-class FakeClass
+class FakeTestClass
 {
     public function testGetNothing()
     {
