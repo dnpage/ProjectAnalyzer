@@ -34,7 +34,7 @@ class ProjectAnalyzer
                     $this->dirs[] = $path;
                 }
             }
-        }  catch (\UnexpectedValueException $e) {
+        } catch (\UnexpectedValueException $e) {
             throw new \Exception("Unable to analyze path: $path Please verify path");
         }
         return $this->dirs;
@@ -52,7 +52,7 @@ class ProjectAnalyzer
     public function getFiles($path)
     {
         $files = [];
-        foreach (glob($path.'/*.php') as $file_name) {
+        foreach (glob($path . '/*.php') as $file_name) {
             $files[] = $file_name;
         }
         return $files;
@@ -142,7 +142,7 @@ class ProjectAnalyzer
         $loc_breakdown['code_loc'] = $code_loc;
         $loc_breakdown['test_loc'] = $test_loc;
         if ($code_loc > 0) {
-            $ratio = round($test_loc/$code_loc, 2);
+            $ratio = round($test_loc / $code_loc, 2);
             $loc_breakdown['code_to_test_ratio'] = '1:' . $ratio;
         } else {
             $loc_breakdown['code_to_test_ratio'] = '';
@@ -257,7 +257,7 @@ class ProjectAnalyzer
     private function formatLOCPerMethod($num_loc, $num_methods)
     {
         if ($num_methods > 0) {
-            $loc_per_method = round($num_loc/$num_methods, 1);
+            $loc_per_method = round($num_loc / $num_methods, 1);
         } else {
             $loc_per_method = '-';
         }
