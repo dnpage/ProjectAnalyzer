@@ -90,16 +90,9 @@ class ProjectAnalyzer
                 $method_count = $this->getTokenCount($file, T_FUNCTION);
                 $stat['Methods'] += $method_count;
             }
-            if ($stat['Classes'] > 0) {
-                $stat['M/C'] = round($stat['Methods'] / $stat['Classes'], 1);
-            } else {
-                $stat ['M/C'] = '-';
-            }
-            if ($stat['Methods'] > 0) {
-                $stat['LOC/M'] = round($stat['LOC'] / $stat['Methods'], 1);
-            } else {
-                $stat ['LOC/M'] = '-';
-            }
+            $stat['M/C'] = $this->formatMethodsPerClass($stat['Methods'], $stat['Classes']);
+            $stat['LOC/M'] = $this->formatLOCPerMethod($stat['LOC'], $stat['Methods']);
+
             if ($stat['Lines'] > 0) {
                 $stats[] = $stat;
             }
@@ -114,6 +107,7 @@ class ProjectAnalyzer
 
     private function calcTotalStats()
     {
+        $total_stats = [];
 
         $total_loc = $this->getTotalLOC();
 
@@ -122,22 +116,16 @@ class ProjectAnalyzer
         $total_stats['LOC'] = $total_loc['loc'];
         $total_stats['Classes'] = $this->getTotalTokenCount(T_CLASS);
         $total_stats['Methods'] = $this->getTotalTokenCount(T_FUNCTION);
-        if ($total_stats['Classes'] > 0) {
-            $total_stats['M/C'] = round($total_stats['Methods'] / $total_stats['Classes'], 1);
-        } else {
-            $total_stats['M/C'] = '-';
-        }
-        if ($total_stats['Methods'] > 0) {
-            $total_stats['LOC/M'] = round($total_stats['LOC']/$total_stats['Methods'], 1);
-        } else {
-            $total_stats['LOC/M'] = '-';
-        }
+        $total_stats['M/C'] = $this->formatMethodsPerClass($total_stats['Methods'], $total_stats['Classes']);
+        $total_stats['LOC/M'] = $this->formatLOCPerMethod($total_stats['LOC'], $total_stats['Methods']);
 
         return $total_stats;
     }
 
     private function calcTotalLOCBreakdown($stats)
     {
+        $loc_breakdown = [];
+
         $code_loc = 0;
         $test_loc = 0;
         $loc_breakdown['code_loc'] = 0;
@@ -254,5 +242,25 @@ class ProjectAnalyzer
     {
         $path = strtolower($path);
         return strpos($path, 'test') !== false;
+    }
+
+    private function formatMethodsPerClass($num_methods, $num_classes)
+    {
+        if ($num_classes > 0) {
+            $methods_per_class = round($num_methods / $num_classes, 1);
+        } else {
+            $methods_per_class = '-';
+        }
+        return $methods_per_class;
+    }
+
+    private function formatLOCPerMethod($num_loc, $num_methods)
+    {
+        if ($num_methods > 0) {
+            $loc_per_method = round($num_loc/$num_methods, 1);
+        } else {
+            $loc_per_method = '-';
+        }
+        return $loc_per_method;
     }
 }
