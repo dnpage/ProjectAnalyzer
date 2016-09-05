@@ -26,9 +26,11 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
         $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->setWhiteList('src,tests');
         $white_list = $pa->getWhiteList();
+
+        $rp = realpath(__DIR__. '/../FakeProject1');
         $expected_results = [
-            '/var/www/packages/ProjectAnalyzer/FakeProject1/src',
-            '/var/www/packages/ProjectAnalyzer/FakeProject1/tests'
+            $rp . '/src',
+            $rp .  '/tests'
         ];
         $this->assertInternalType('array', $white_list);
         $this->assertEquals($expected_results, $white_list);
@@ -39,8 +41,10 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
         $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->setBlackList('vendor');
         $black_list = $pa->getBlackList();
+
+        $rp = realpath(__DIR__. '/../FakeProject1');
         $expected_results = [
-            '/var/www/packages/ProjectAnalyzer/FakeProject1/vendor'
+            $rp . '/vendor'
         ];
         $this->assertInternalType('array', $black_list);
         $this->assertEquals($expected_results, $black_list);
