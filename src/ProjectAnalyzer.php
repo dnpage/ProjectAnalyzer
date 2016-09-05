@@ -5,6 +5,9 @@ namespace DNPage\ProjectAnalyzer;
 
 class ProjectAnalyzer
 {
+    protected $path;
+    protected $white_list = [];
+    protected $black_list = [];
     protected $dirs = [];
     protected $files = [];
     protected $stats = [];
@@ -12,33 +15,55 @@ class ProjectAnalyzer
 
     public function __construct($path)
     {
-        $this->dirs = $this->getDirs($path);
+        $this->path = $path;
+    }
+
+    public function setWhiteList($list)
+    {
+        $this->white_list = $this->convertListToPathsArray($list, $this->path);
+    }
+
+    public function setBlackList($list)
+    {
+        $this->black_list = $this->convertListToPathsArray($list, $this->path);
+    }
+
+    public function getWhiteList()
+    {
+        return $this->white_list;
+    }
+
+    public function getBlackList()
+    {
+        return $this->black_list;
+    }
+
+    public function getAllStats()
+    {
+        $this->dirs = $this->getDirs($this->path);
         $this->files = $this->getAllFiles($this->dirs);
         $this->calcAllStats();
+        return $this->stats;
+    }
+
+
+    public function getTotalLOCBreakdown()
+    {
+        return $this->total_loc_breakdown;
     }
 
     public function getDirs($path)
     {
-        try {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator(
-                    $path,
-                    \RecursiveDirectoryIterator::SKIP_DOTS
-                ),
-                \RecursiveIteratorIterator::SELF_FIRST
-            );
-
-            $this->dirs = [$path];
-            foreach ($iterator as $path => $dir) {
-                if ($dir->isDir()) {
-                    $this->dirs[] = $path;
-                }
-            }
-        } catch (\UnexpectedValueException $e) {
-            throw new \Exception("Unable to analyze path: $path Please verify path");
+        $dirs = $this->glob_recursive($path);
+        if (!empty($this->white_list)) {
+            $dirs = array_filter($dirs, [$this, 'isInWhiteList']);
         }
-        return $this->dirs;
+        if (!empty($this->black_list)) {
+            $dirs = array_filter($dirs, [$this, 'isNotInBlackList']);
+        }
+        return $dirs;
     }
+
 
     public function getAllFiles($dirs)
     {
@@ -58,15 +83,6 @@ class ProjectAnalyzer
         return $files;
     }
 
-    public function getAllStats()
-    {
-        return $this->stats;
-    }
-
-    public function getTotalLOCBreakdown()
-    {
-        return $this->total_loc_breakdown;
-    }
 
     private function calcAllStats()
     {
@@ -177,16 +193,9 @@ class ProjectAnalyzer
     public function getLOC($file_name)
     {
         $lines = file($file_name);
-        $count = 0;
-        $blank_line_count = 0;
-        foreach ($lines as $line) {
-            // exclude blank lines from the overall count
-            $line = rtrim($line);
-            if ($line == '') {
-                $blank_line_count++;
-            }
-            $count++;
-        }
+        $count = count($lines);
+        $trimmed_count = count(array_filter(array_map('rtrim', $lines)));
+        $blank_line_count = $count - $trimmed_count;
 
         $php_code = file_get_contents($file_name);
         $tokens = token_get_all($php_code);
@@ -221,6 +230,7 @@ class ProjectAnalyzer
     }
 
     public function getTokenCount($file, $token) {
+
         $php_code = file_get_contents($file);
         $items = [];
         $tokens = token_get_all($php_code);
@@ -234,7 +244,6 @@ class ProjectAnalyzer
                 $items[] = $token_name;
             }
         }
-
         return count($items);
     }
 
@@ -262,5 +271,52 @@ class ProjectAnalyzer
             $loc_per_method = '-';
         }
         return $loc_per_method;
+    }
+
+
+    private function convertListToPathsArray($list, $path)
+    {
+        $list = array_filter(explode(',', $list));
+        $list = array_map(function($val) use($path) {
+            return $path . '/' . $val;
+        }, $list);
+        return $list;
+    }
+
+
+    private function glob_recursive($path)
+    {
+        if (!is_dir($path)) {
+            return [];
+        }
+        $dirs[] = $path;
+        foreach (glob($path.'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+            $dirs = array_merge($dirs, $this->glob_recursive($dir));
+        }
+        return $dirs;
+    }
+
+    private function isInWhiteList($path)
+    {
+        $in_white_list = false;
+        foreach ($this->white_list as $good_dir) {
+            if (strpos($path, $good_dir) !== false) {
+                $in_white_list = true;
+                break;
+            }
+        }
+        return $in_white_list;
+    }
+
+    private function isNotInBlackList($path)
+    {
+        $in_black_list = false;
+        foreach ($this->black_list as $good_dir) {
+            if (strpos($path, $good_dir) !== false) {
+                $in_black_list = true;
+                break;
+            }
+        }
+        return !$in_black_list;
     }
 }
