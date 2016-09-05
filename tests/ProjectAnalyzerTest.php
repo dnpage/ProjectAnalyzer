@@ -124,6 +124,8 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
         $pa->setBlackList('vendor');
         $dirs = $pa->getDirs(realpath(__DIR__ . '/../'));
 
+        print_r($dirs);
+
         $this->assertInternalType('array', $dirs);
         $this->assertEquals(9, count($dirs));
     }
