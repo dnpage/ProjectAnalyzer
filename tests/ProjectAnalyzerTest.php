@@ -121,10 +121,8 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
     public function testReturnsArrayOfDirectoriesWithUsingBlackList()
     {
         $pa = new ProjectAnalyzer(realpath(__DIR__ . '/../'));
-        $pa->setBlackList('vendor');
+        $pa->setBlackList('vendor,build');
         $dirs = $pa->getDirs(realpath(__DIR__ . '/../'));
-
-        print_r($dirs);
 
         $this->assertInternalType('array', $dirs);
         $this->assertEquals(9, count($dirs));
