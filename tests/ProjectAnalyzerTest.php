@@ -113,7 +113,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
     {
         $pa = new ProjectAnalyzer(realpath(__DIR__ . '/../'));
         $pa->setWhiteList('tests');
-        $dirs = $pa->getDirs(dirname(__DIR__));
+        $dirs = $pa->getDirs(realpath(__DIR__ . '/../'));
         $this->assertInternalType('array', $dirs);
         $this->assertEquals(1, count($dirs));
     }
@@ -122,7 +122,8 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
     {
         $pa = new ProjectAnalyzer(realpath(__DIR__ . '/../'));
         $pa->setBlackList('vendor');
-        $dirs = $pa->getDirs(dirname(__DIR__));
+        $dirs = $pa->getDirs(realpath(__DIR__ . '/../'));
+
         $this->assertInternalType('array', $dirs);
         $this->assertEquals(9, count($dirs));
     }
