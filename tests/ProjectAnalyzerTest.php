@@ -23,7 +23,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testSettingOfWhiteList()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->setWhiteList('src,tests');
         $white_list = $pa->getWhiteList();
         $expected_results = [
@@ -36,7 +36,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testSettingOfBlackList()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->setBlackList('vendor');
         $black_list = $pa->getBlackList();
         $expected_results = [
@@ -48,7 +48,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testSettingOfBlackListWithEmptyPath()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->setBlackList('');
         $black_list = $pa->getBlackList();
         $expected_results = [];
@@ -68,7 +68,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsStatsForProjectWithSourceAndTestDirs()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject2');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject2'));
         $stats = $pa->getAllStats();
 
         $this->assertInternalType('array', $stats);
@@ -77,17 +77,17 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsStatsForProjectWithNoClassesOrMethods()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject3');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject2'));
         $stats = $pa->getAllStats();
 
         $this->assertInternalType('array', $stats);
-        $this->assertEquals(2, count($stats));
+        $this->assertEquals(3, count($stats));
     }
 
 
     public function testReturnsStatsForProjectWithOnlyTestDir()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject4');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject4'));
         $stats = $pa->getAllStats();
 
         $this->assertInternalType('array', $stats);
@@ -97,8 +97,8 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsArrayOfDirectories()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $dirs = $pa->getDirs(dirname(__DIR__) . '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $dirs = $pa->getDirs(realpath(__DIR__. '/../FakeProject1'));
 
         $this->assertInternalType('array', $dirs);
         $this->assertEquals(1, count($dirs));
@@ -107,7 +107,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsArrayOfDirectoriesWithUsingWhiteList()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__));
+        $pa = new ProjectAnalyzer(realpath(__DIR__ . '/../'));
         $pa->setWhiteList('tests');
         $dirs = $pa->getDirs(dirname(__DIR__));
         $this->assertInternalType('array', $dirs);
@@ -116,7 +116,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsArrayOfDirectoriesWithUsingBlackList()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__));
+        $pa = new ProjectAnalyzer(realpath(__DIR__ . '/../'));
         $pa->setBlackList('vendor');
         $dirs = $pa->getDirs(dirname(__DIR__));
         $this->assertInternalType('array', $dirs);
@@ -125,7 +125,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testExceptionIsGeneratedWhenBadPathForDirs()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $dirs = $pa->getDirs('nonexistent/path');
         $this->assertEmpty($dirs);
 
@@ -133,8 +133,8 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsArrayOfFiles()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $dirs = $pa->getDirs(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $dirs = $pa->getDirs(realpath(__DIR__. '/../FakeProject1'));
         $files = $pa->getAllFiles($dirs);
         $this->assertInternalType('array', $files);
         $this->assertEquals(3, count($files[$dirs[0]]));
@@ -143,8 +143,8 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsLOCForAFile()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $loc = $pa->getLOC(dirname(__DIR__) . '/FakeProject1/FakeDoubleClass.php');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $loc = $pa->getLOC(realpath(__DIR__. '/../FakeProject1/FakeDoubleClass.php'));
         $sub_total = $loc['blank'] + $loc['comment'] + $loc['loc'];
         $this->assertEquals(5, $loc['blank']);
         $this->assertEquals(7, $loc['comment']);
@@ -155,7 +155,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsTotalLOCForAllFiles()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->getAllStats();
         $total_loc = $pa->getTotalLoc();
         $sub_total = $total_loc['blank'] + $total_loc['comment'] + $total_loc['loc'];
@@ -168,7 +168,7 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsTotalLOCBreakdown()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->getAllStats();
         $loc_breakdown = $pa->getTotalLOCBreakdown();
         $this->assertInternalType('array', $loc_breakdown);
@@ -179,30 +179,30 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsClassCountForAFileWithOneClassDeclaration()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $class_count = $pa->getTokenCount(dirname(__DIR__) . '/FakeProject1/FakeClass.php', T_CLASS);
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $class_count = $pa->getTokenCount(realpath(__DIR__. '/../FakeProject1/FakeClass.php'), T_CLASS);
         $this->assertEquals(1, $class_count);
     }
 
 
     public function testReturnsClassCountForAFileWithTwoClassDeclarations()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $class_count = $pa->getTokenCount(dirname(__DIR__) . '/FakeProject1/FakeDoubleClass.php', T_CLASS);
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $class_count = $pa->getTokenCount(realpath(__DIR__. '/../FakeProject1/FakeDoubleClass.php'), T_CLASS);
         $this->assertEquals(2, $class_count);
     }
 
 
     public function testReturnsClassCountForAFileWithAnInterfaceDeclarations()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $class_count = $pa->getTokenCount(dirname(__DIR__) . '/FakeProject1/FakeInterface.php', T_CLASS);
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $class_count = $pa->getTokenCount(realpath(__DIR__. '/../FakeProject1/FakeInterface.php'), T_CLASS);
         $this->assertEquals(0, $class_count);
     }
 
     public function testReturnsTotalClassCountForAllFiles()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->getAllStats();
         $total_class_count = $pa->getTotalTokenCount(T_CLASS);
         $this->assertGreaterThan(0, $total_class_count);
@@ -211,14 +211,14 @@ class ProjectAnalyzerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsMethodCountForOneClass()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
-        $method_count = $pa->getTokenCount(dirname(__DIR__) . '/FakeProject1/FakeClass.php', T_FUNCTION);
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
+        $method_count = $pa->getTokenCount(realpath(__DIR__. '/../FakeProject1/FakeClass.php'), T_FUNCTION);
         $this->assertEquals(1, $method_count);
     }
 
     public function testReturnsTotalMethodCountForAllFiles()
     {
-        $pa = new ProjectAnalyzer(dirname(__DIR__). '/FakeProject1');
+        $pa = new ProjectAnalyzer(realpath(__DIR__. '/../FakeProject1'));
         $pa->getAllStats();
         $total_method_count = $pa->getTotalTokenCount(T_FUNCTION);
         $this->assertGreaterThan(0, $total_method_count);
